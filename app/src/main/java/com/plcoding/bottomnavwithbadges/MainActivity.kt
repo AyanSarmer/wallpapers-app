@@ -4,15 +4,19 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -24,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -45,37 +50,29 @@ class MainActivity : ComponentActivity() {
         setContent {
             TestTheme {
                 val navController = rememberNavController()
-                Scaffold (
+                Scaffold(
                     bottomBar = {
-                        BottomNavigationBar(
-                            items = listOf(
-                                BottomNavItem(
-                                    name = "Home",
-                                    route = "Home",
-                                    icon = Icons.Default.Home
-                                ),
-                                BottomNavItem(
-                                    name = "Chat",
-                                    route = "Chat",
-                                    icon = Icons.Default.Notifications
-                                ),
-                                BottomNavItem(
-                                    name = "Settings",
-                                    route = "Settings",
-                                    icon = Icons.Default.Settings
-                                ),
+                        BottomNavigationBar(modifier = Modifier.height(60.dp), items = listOf(
+                            BottomNavItem(
+                                name = "Home",
+                                route = "Home",
+                                icon = Icons.Default.Home
                             ),
-                            navController = navController,
-                            onItemClick = {
-                                navController.navigate(it.route)
-                            }
-                        )
-                    }
-                ) {
+                            BottomNavItem(
+                                name = "Favourites",
+                                route = "Favourites",
+                                icon = Icons.Default.Favorite
+                            ),
+                        ), navController = navController, onItemClick = {
+                            navController.navigate(it.route)
+                        })
+                    },
+
+                    ) {
                     Navigation(navController = navController)
                 }
             }
-            
+
         }
     }
 }
@@ -86,15 +83,11 @@ fun Navigation(navController: NavHostController) {
         composable("home") {
             HomeScreen()
         }
-        composable("chat") {
-            ChatScreen()
-        }
-        composable("settings") {
-            SettingsScreen()
+        composable("Favourites") {
+            FavouritesScreen()
         }
     }
 }
-
 
 @ExperimentalMaterial3Api
 @Composable
@@ -106,48 +99,30 @@ fun BottomNavigationBar(
 ) {
     val backStackEntry = navController.currentBackStackEntryAsState()
     NavigationBar(
-        modifier = modifier,
-        containerColor = Color.DarkGray,
-        tonalElevation = 5.dp
+        modifier = modifier, containerColor = Color.DarkGray, tonalElevation = 5.dp
     ) {
-        items.forEach{ item ->
+        items.forEach { item ->
             val selected = item.route == backStackEntry.value?.destination?.route
             NavigationBarItem(
                 selected = selected,
-                onClick = {onItemClick(item)},
+                onClick = { onItemClick(item) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.Cyan,
+                    selectedTextColor = Color.Red,
                     unselectedIconColor = Color.Gray,
                 ),
                 icon = {
                     Column(horizontalAlignment = CenterHorizontally) {
-                        if(item.badgeCount > 0) {
-                            BadgedBox(
-                                badge = {
-                                    Badge {Text(item.badgeCount.toString())}
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = item.name
-                                )
-                            }
-                        } else {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.name
-                            )
-                        }
-                        if(selected) {
+                        Icon(
+                            imageVector = item.icon, contentDescription = item.name
+                        )
+
+                        if (selected) {
                             Text(
-                                text = item.name,
-                                textAlign = TextAlign.Center,
-                                fontSize = 10.sp
+                                text = item.name, textAlign = TextAlign.Center, fontSize = 10.sp
                             )
                         }
                     }
-                }
-            )
+                })
         }
     }
 }
@@ -155,29 +130,30 @@ fun BottomNavigationBar(
 @Composable
 fun HomeScreen() {
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
-        Text(text = "Home screen")
+        LazyVerticalGrid(columns = GridCells.Fixed(2), content = {
+            items(12) { i ->
+                Box(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(Color.Yellow)
+
+                ) {
+                    Text(text = "Item $i")
+                }
+            }
+        })
     }
 }
 
 @Composable
-fun ChatScreen() {
+fun FavouritesScreen() {
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
-        Text(text = "Chat screen")
-    }
-}
-
-@Composable
-fun SettingsScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = "Settings screen")
+        Text(text = "Favourites")
     }
 }
